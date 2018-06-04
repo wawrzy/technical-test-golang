@@ -4,10 +4,11 @@ import (
 	"net/http"
 	"log"
 	"./route"
+	"./model"
 )
 
 func main() {
-
+	model.InitDB()
 	buildRouter()
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

@@ -7,12 +7,24 @@ import (
 )
 
 type NewUser struct {
-	Username            string
+	Email		string
+	Password	string
+	Firstname	string
+	Lastname	string
+	Type		string
 }
 
 func (u *NewUser) OK() error {
-	if len(u.Username) == 0 {
+	if len(u.Email) == 0 {
 		return shared.ErrMissingField("username")
+	} else if len(u.Password) == 0 {
+		return shared.ErrMissingField("password")
+	} else if len(u.Firstname) == 0 {
+		return shared.ErrMissingField("firstname")
+	} else if len(u.Lastname) == 0 {
+		return shared.ErrMissingField("lastname")
+	} else if len(u.Type) == 0 {
+		return shared.ErrMissingField("type")
 	}
 	return nil
 }
@@ -22,7 +34,7 @@ func signupPost(w http.ResponseWriter, r *http.Request) {
 	if err := shared.DecodeJSON(r, &u); err != nil {
 		ErrorRequest(w, r, 400, err)
 	}
-	fmt.Println(u.Username)
+	fmt.Println(u.Email)
 }
 
 func Signup(w http.ResponseWriter, r *http.Request) {
