@@ -17,6 +17,10 @@ type CloseTicket struct {
 	ID	uint
 }
 
+type ArchiveTicket struct {
+	ID	uint
+}
+
 type UpdateTicket struct {
 	Author	string
 	Title	string
@@ -39,6 +43,13 @@ func (u *CloseTicket) OK() error {
 	return nil
 }
 
+func (u *ArchiveTicket) OK() error {
+	if u.ID == 0 {
+		return shared.ErrMissingField("id")
+	}
+	return nil
+}
+
 func (u *UpdateTicket) OK() error {
 	if len(u.Author) == 0 {
 		return shared.ErrMissingField("author")
@@ -46,6 +57,8 @@ func (u *UpdateTicket) OK() error {
 		return shared.ErrMissingField("title")
 	} else if len(u.Status) == 0 {
 		return shared.ErrMissingField("status")
+	} else if u.Status != "closed" && u.Status != "pending reply" && u.Status != "open" {
+		return errors.New("status must be closed / pending reply / open")
 	}
 	return nil
 }
@@ -96,6 +109,17 @@ func ticketPut(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func ticketArchive(w http.ResponseWriter, r *http.Request) {
+	var u ArchiveTicket
+	if err := shared.DecodeJSON(r, &u); err != nil {
+		ErrorRequest(w, r, 400, err)
+		return
+	}
+	if err := model.ArchiveTicket(u.ID); err != nil {
+		ErrorRequest(w, r, 400, err)
+	}
+}
+
 func Ticket(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		if err := shared.CheckAuthToken(r); err != nil {
@@ -131,6 +155,18 @@ func TicketClose(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		ticketClose(w, r)
+		return
+	}
+	ErrorRequest(w, r,404, nil)
+}
+
+func TicketArchive(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		if err := shared.CheckAuthToken(r); err != nil {
+			ErrorRequest(w, r,401, err)
+			return
+		}
+		ticketArchive(w, r)
 		return
 	}
 	ErrorRequest(w, r,404, nil)

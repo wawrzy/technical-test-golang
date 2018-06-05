@@ -5,11 +5,17 @@ import (
 	"fmt"
 	"strconv"
 	"net/http"
-	"encoding/json"
 )
 
 type Ticket struct {
 	ID		uint	`gorm:"primary_key;AUTO_INCREMENT"`
+	Author	string
+	Status	string
+	Title	string
+}
+
+type TicketArchive struct {
+	ID		uint
 	Author	string
 	Status	string
 	Title	string
@@ -58,7 +64,7 @@ func CloseTicket(ticket_id uint) error {
 		return errors.New(fmt.Sprintf("ticket with id %d not found\n", ticket_id))
 	}
 
-	ticket.Status = "close"
+	ticket.Status = "closed"
 
 	if err := db.Save(&ticket).Error; err != nil {
 		return err
@@ -67,15 +73,6 @@ func CloseTicket(ticket_id uint) error {
 	return nil
 }
 
-func responseJSON(w http.ResponseWriter, data interface{}) {
-	jData, err := json.Marshal(data)
-	if err != nil {
-		panic(err)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(jData)
-}
 func getSingleTicket(ticketId uint) (interface{}, error) {
 	ticket := Ticket{ID: ticketId}
 	if db.First(&ticket).RecordNotFound() {
@@ -94,9 +91,49 @@ func getSingleTicket(ticketId uint) (interface{}, error) {
 	return response, nil
 }
 
+func getUserTickets(userEmail string) (interface{}, error) {
+	user := User{Email: userEmail}
+	if db.First(&user).RecordNotFound() {
+		return nil, errors.New("user with email " + userEmail + " not found")
+	}
+	var tickets []Ticket
+	var response []SingleTicket
+	db.Find(&tickets, "author = ?", userEmail)
+	for _, ticket := range tickets {
+		signTicket := SingleTicket{ID: ticket.ID, Author: ticket.Author, Title: ticket.Author, Status: ticket.Status}
+		var messages []Message
+		db.Find(&messages, "ticket = ?", ticket.ID)
+		for _, message := range messages {
+			signTicket.Messages = append(
+				signTicket.Messages,
+				MessageJson{Author: message.Author, Message: message.Message, ID: message.ID, Ticket: message.Ticket})
+		}
+		response = append(response, signTicket)
+	}
+	return response, nil
+}
+
+func getAllTickets() (interface{}, error) {
+	var tickets []Ticket
+	var response []SingleTicket
+	db.Find(&tickets)
+	for _, ticket := range tickets {
+		signTicket := SingleTicket{ID: ticket.ID, Author: ticket.Author, Title: ticket.Author, Status: ticket.Status}
+		var messages []Message
+		db.Find(&messages, "ticket = ?", ticket.ID)
+		for _, message := range messages {
+			signTicket.Messages = append(
+				signTicket.Messages,
+				MessageJson{Author: message.Author, Message: message.Message, ID: message.ID, Ticket: message.Ticket})
+		}
+		response = append(response, signTicket)
+	}
+	return response, nil
+}
+
 func GetTicket(r *http.Request) (interface{}, error) {
 	ticketId_str := r.URL.Query().Get("ticket_id")
-	//userEmail := url.Query().Get("user_email")
+	userEmail := r.URL.Query().Get("user_email")
 
 	if len(ticketId_str) != 0 {
 		var ticketId uint64
@@ -105,6 +142,27 @@ func GetTicket(r *http.Request) (interface{}, error) {
 			return nil, errors.New("ticket_id query param should be an integer")
 		}
 		return getSingleTicket(uint(ticketId))
+	} else if len(userEmail) != 0 {
+		return getUserTickets(userEmail)
 	}
-	return nil, nil
+	return getAllTickets()
+}
+
+func ArchiveTicket(ticketId uint) error {
+	ticket := Ticket{ID: ticketId}
+	if db.First(&ticket).RecordNotFound() {
+		return errors.New(fmt.Sprintf("ticket with id %d not found", ticketId))
+	}
+	if ticket.Status != "closed" {
+		return errors.New("ticket should be closed")
+	}
+	archiveTicket := TicketArchive{ID: ticketId, Author: ticket.Author, Title: ticket.Title, Status: "closed"}
+	if err := db.Create(&archiveTicket).Error; err != nil {
+		return err
+	}
+	if err := ArchiveTicketMessages(ticketId); err != nil {
+		return err
+	}
+	db.Delete(&ticket)
+	return nil
 }

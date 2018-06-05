@@ -18,7 +18,7 @@ func InitDB() {
 		log.Panic(err)
 	}
 
-	db.AutoMigrate(&User{}, &Credential{}, &Ticket{}, &Message{})
+	db.AutoMigrate(&User{}, &Credential{}, &Ticket{}, &Message{}, &TicketArchive{}, &MessageArchive{})
 	db.Model(&Ticket{}).AddForeignKey("author", "users(email)", "RESTRICT", "RESTRICT")
 	db.Model(&Message{}).AddForeignKey("ticket", "tickets(id)", "RESTRICT", "RESTRICT")
 	db.Model(&Message{}).AddForeignKey("author", "users(email)", "RESTRICT", "RESTRICT")

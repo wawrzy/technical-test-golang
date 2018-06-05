@@ -75,6 +75,19 @@ func Message(w http.ResponseWriter, r *http.Request) {
 		}
 		messagePut(w, r)
 		return
+	} else if r.Method == "GET" {
+		if err := shared.CheckAuthToken(r); err != nil {
+			ErrorRequest(w, r,401, err)
+			return
+		}
+		var err error
+		var response interface{}
+		if response, err = model.GetMessage(r); err != nil {
+			ErrorRequest(w, r,400, err)
+		} else {
+			shared.ResponseJSON(w, response)
+		}
+		return
 	}
 	ErrorRequest(w, r,404, nil)
 }
