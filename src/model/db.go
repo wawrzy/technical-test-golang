@@ -18,5 +18,5 @@ func InitDB() {
 		log.Panic(err)
 	}
 
-	defer db.Close()
+	db.AutoMigrate(&User{}, &Credential{})
 }
