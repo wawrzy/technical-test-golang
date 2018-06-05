@@ -1,5 +1,7 @@
 package model
 
+import "errors"
+
 type User struct {
 	Email		string `gorm:"primary_key"`
 	Firstname	string
@@ -20,7 +22,9 @@ func CreateUser(email string, firstname string, lastname string, role string) er
 func UpdateUser(old_email string, email string, firstname string, lastname string, role string) error {
 	user := User{Email: old_email}
 
-	db.First(&user)
+	if db.First(&user).RecordNotFound() {
+		return errors.New("user with email " + old_email + " not found")
+	}
 
 	user.Email = email
 	user.Firstname = firstname

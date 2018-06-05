@@ -17,6 +17,8 @@ func Routes() []Route {
 	arrayRoutes = append(arrayRoutes, Route{Path: "/signin", Callback: controller.Signin})
 	arrayRoutes = append(arrayRoutes, Route{Path: "/user", Callback: controller.User})
 	arrayRoutes = append(arrayRoutes, Route{Path: "/ticket", Callback: controller.Ticket})
+	arrayRoutes = append(arrayRoutes, Route{Path: "/ticket/close", Callback: controller.TicketClose})
+	arrayRoutes = append(arrayRoutes, Route{Path: "/message", Callback: controller.Message})
 
 	return arrayRoutes
 }
