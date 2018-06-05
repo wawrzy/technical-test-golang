@@ -27,7 +27,12 @@ func UpdateUser(old_email string, email string, firstname string, lastname strin
 	user.Lastname = lastname
 	user.Type = role
 
-	if err := db.Save(&user).Error; err != nil {
+	if email != old_email {
+		db.Delete(User{Email: old_email})
+		if err := db.Create(&user).Error; err != nil {
+			return err
+		}
+	} else if err := db.Save(&user).Error; err != nil {
 		return err
 	}
 
