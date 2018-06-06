@@ -29,14 +29,14 @@ type SingleTicket struct {
 	Messages	[]MessageJson	`json:"messages"`
 }
 
-func CreateTicket(author string, title string) error {
+func CreateTicket(author string, title string) (interface{}, error) {
 	ticket := Ticket{Author: author, Status: "open", Title: title }
 
 	if err := db.Create(&ticket).Error; err != nil {
-		return err
+		return nil, err
 	}
-
-	return nil
+	singleTicket := SingleTicket{ID: ticket.ID, Author: author, Status: "open", Title: title}
+	return singleTicket, nil
 }
 
 func UpdateTicket(ticket_id uint, author string, status string, title string) error {
@@ -73,12 +73,12 @@ func CloseTicket(ticket_id uint) error {
 	return nil
 }
 
-func getSingleTicket(ticketId uint) (interface{}, error) {
+func GetSingleTicket(ticketId uint) (interface{}, error) {
 	ticket := Ticket{ID: ticketId}
 	if db.First(&ticket).RecordNotFound() {
 		return nil, errors.New(fmt.Sprintf("ticket with id %d not found\n", ticketId))
 	}
-	response := SingleTicket{ID: ticket.ID, Author: ticket.Author, Title: ticket.Author, Status: ticket.Status}
+	response := SingleTicket{ID: ticket.ID, Author: ticket.Author, Title: ticket.Title, Status: ticket.Status}
 
 	var messages []Message
 	db.Find(&messages, "ticket = ?", ticketId)
@@ -100,7 +100,7 @@ func getUserTickets(userEmail string) (interface{}, error) {
 	var response []SingleTicket
 	db.Find(&tickets, "author = ?", userEmail)
 	for _, ticket := range tickets {
-		signTicket := SingleTicket{ID: ticket.ID, Author: ticket.Author, Title: ticket.Author, Status: ticket.Status}
+		signTicket := SingleTicket{ID: ticket.ID, Author: ticket.Author, Title: ticket.Title, Status: ticket.Status}
 		var messages []Message
 		db.Find(&messages, "ticket = ?", ticket.ID)
 		for _, message := range messages {
@@ -118,7 +118,7 @@ func getAllTickets() (interface{}, error) {
 	var response []SingleTicket
 	db.Find(&tickets)
 	for _, ticket := range tickets {
-		signTicket := SingleTicket{ID: ticket.ID, Author: ticket.Author, Title: ticket.Author, Status: ticket.Status}
+		signTicket := SingleTicket{ID: ticket.ID, Author: ticket.Author, Title: ticket.Title, Status: ticket.Status}
 		var messages []Message
 		db.Find(&messages, "ticket = ?", ticket.ID)
 		for _, message := range messages {
@@ -141,7 +141,7 @@ func GetTicket(r *http.Request) (interface{}, error) {
 		if ticketId, err = strconv.ParseUint(ticketId_str, 10, 64); err != nil {
 			return nil, errors.New("ticket_id query param should be an integer")
 		}
-		return getSingleTicket(uint(ticketId))
+		return GetSingleTicket(uint(ticketId))
 	} else if len(userEmail) != 0 {
 		return getUserTickets(userEmail)
 	}

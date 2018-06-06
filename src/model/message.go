@@ -28,11 +28,11 @@ type MessageJson struct {
 	Author		string	`json:"author"`
 }
 
-func CreateMessage(ticket uint, author string, message string) error {
+func CreateMessage(ticket uint, author string, message string) (interface{}, error) {
 	newMessage := Message{Author: author, Message: message, Ticket: ticket }
 
 	if err := db.Create(&newMessage).Error; err != nil {
-		return err
+		return nil, err
 	}
 
 	updateTicket := Ticket{ID: ticket}
@@ -40,10 +40,10 @@ func CreateMessage(ticket uint, author string, message string) error {
 	updateTicket.Status = "pending reply"
 
 	if err := db.Save(&updateTicket).Error; err != nil {
-		return err
+		return nil, err
 	}
-
-	return nil
+	jsonMessage := MessageJson{Author: author, Message: message, Ticket: ticket, ID: newMessage.ID}
+	return jsonMessage, nil
 }
 
 func UpdateMessage(message_id uint, ticket uint, author string, message string) error {

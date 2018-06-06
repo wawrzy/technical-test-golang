@@ -50,6 +50,7 @@ func userPost(w http.ResponseWriter, r *http.Request) {
 	var u NewUser
 	if err := shared.DecodeJSON(r, &u); err != nil {
 		ErrorRequest(w, r, 400, err)
+		return
 	}
 	if err := model.CreateUser(u.Email, u.Firstname, u.Lastname, u.Type); err != nil {
 		ErrorRequest(w, r, 400, err)
