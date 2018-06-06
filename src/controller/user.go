@@ -61,20 +61,18 @@ func userPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func User(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" {
-		if err := shared.CheckAuthToken(r); err != nil {
-			ErrorRequest(w, r,401, err)
-			return
-		}
-		userPost(w, r)
-		return
-	} else if r.Method == "PUT" {
-		if err := shared.CheckAuthToken(r); err != nil {
-			ErrorRequest(w, r,401, err)
-			return
-		}
-		userPut(w, r)
+	if err := shared.CheckAuthToken(r); err != nil {
+		ErrorRequest(w, r,401, err)
 		return
 	}
-	ErrorRequest(w, r,404, nil)
+	switch r.Method	{
+		case "POST":
+			userPost(w, r)
+			break
+		case "PUT":
+			userPut(w, r)
+			break
+		default:
+			ErrorRequest(w, r,404, nil)
+	}
 }

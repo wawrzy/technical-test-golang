@@ -125,44 +125,42 @@ func ticketArchive(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func ticketGet(w http.ResponseWriter, r *http.Request) {
+	var err error
+	var response interface{}
+	if response, err = model.GetTicket(r); err != nil {
+		ErrorRequest(w, r,400, err)
+	} else {
+		shared.ResponseJSON(w, response)
+	}
+}
+
 func Ticket(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" {
-		if err := shared.CheckAuthToken(r); err != nil {
-			ErrorRequest(w, r,401, err)
-			return
-		}
-		ticketPost(w, r)
-		return
-	} else if r.Method == "PUT" {
-		if err := shared.CheckAuthToken(r); err != nil {
-			ErrorRequest(w, r,401, err)
-			return
-		}
-		ticketPut(w, r)
-		return
-	} else if r.Method == "GET" {
-		if err := shared.CheckAuthToken(r); err != nil {
-			ErrorRequest(w, r,401, err)
-			return
-		}
-		var err error
-		var response interface{}
-		if response, err = model.GetTicket(r); err != nil {
-			ErrorRequest(w, r,400, err)
-		} else {
-			shared.ResponseJSON(w, response)
-		}
+	if err := shared.CheckAuthToken(r); err != nil {
+		ErrorRequest(w, r,401, err)
 		return
 	}
-	ErrorRequest(w, r,404, nil)
+	switch r.Method {
+		case "POST":
+			ticketPost(w, r)
+			break
+		case "PUT":
+			ticketPut(w, r)
+			break
+		case "GET":
+			ticketGet(w, r)
+			break
+		default:
+			ErrorRequest(w, r,404, nil)
+	}
 }
 
 func TicketClose(w http.ResponseWriter, r *http.Request) {
+	if err := shared.CheckAuthToken(r); err != nil {
+		ErrorRequest(w, r,401, err)
+		return
+	}
 	if r.Method == "POST" {
-		if err := shared.CheckAuthToken(r); err != nil {
-			ErrorRequest(w, r,401, err)
-			return
-		}
 		ticketClose(w, r)
 		return
 	}
@@ -170,11 +168,11 @@ func TicketClose(w http.ResponseWriter, r *http.Request) {
 }
 
 func TicketArchive(w http.ResponseWriter, r *http.Request) {
+	if err := shared.CheckAuthToken(r); err != nil {
+		ErrorRequest(w, r,401, err)
+		return
+	}
 	if r.Method == "POST" {
-		if err := shared.CheckAuthToken(r); err != nil {
-			ErrorRequest(w, r,401, err)
-			return
-		}
 		ticketArchive(w, r)
 		return
 	}

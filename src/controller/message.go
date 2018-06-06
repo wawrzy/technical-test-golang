@@ -65,34 +65,32 @@ func messagePut(w http.ResponseWriter, r *http.Request) {
 	shared.ResponseJSON(w, message)
 }
 
+func messageGet(w http.ResponseWriter, r *http.Request) {
+	var err error
+	var response interface{}
+	if response, err = model.GetMessage(r); err != nil {
+		ErrorRequest(w, r,400, err)
+	} else {
+		shared.ResponseJSON(w, response)
+	}
+}
+
 func Message(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" {
-		if err := shared.CheckAuthToken(r); err != nil {
-			ErrorRequest(w, r,401, err)
-			return
-		}
-		messagePost(w, r)
-		return
-	} else if r.Method == "PUT" {
-		if err := shared.CheckAuthToken(r); err != nil {
-			ErrorRequest(w, r,401, err)
-			return
-		}
-		messagePut(w, r)
-		return
-	} else if r.Method == "GET" {
-		if err := shared.CheckAuthToken(r); err != nil {
-			ErrorRequest(w, r,401, err)
-			return
-		}
-		var err error
-		var response interface{}
-		if response, err = model.GetMessage(r); err != nil {
-			ErrorRequest(w, r,400, err)
-		} else {
-			shared.ResponseJSON(w, response)
-		}
+	if err := shared.CheckAuthToken(r); err != nil {
+		ErrorRequest(w, r,401, err)
 		return
 	}
-	ErrorRequest(w, r,404, nil)
+	switch r.Method {
+		case "POST":
+			messagePost(w, r)
+			break
+		case "PUT":
+			messagePut(w, r)
+			break
+		case "GET":
+			messageGet(w, r)
+			break
+		default:
+			ErrorRequest(w, r,404, nil)
+	}
 }
