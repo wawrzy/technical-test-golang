@@ -15,9 +15,6 @@ clean:
 	$(GOCLEAN)
 	rm -f $(BINARY_NAME)
 	rm -f $(BINARY_UNIX)
-run:
-	$(GOBUILD) -o $(BINARY_NAME) -v $(SRC)
-	./$(BINARY_NAME)
 deps:
 	$(GOGET) github.com/jinzhu/gorm
 	$(GOGET) github.com/jinzhu/gorm/dialects/mysql

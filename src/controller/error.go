@@ -2,14 +2,20 @@ package controller
 
 import (
 	"net/http"
+	"../shared"
 	"fmt"
 )
+
+type Error struct {
+	Error string `json:"error"`
+}
 
 func ErrorRequest(w http.ResponseWriter, r *http.Request, status int, err error) {
 	w.WriteHeader(status)
 	if status == http.StatusNotFound {
-		fmt.Fprint(w, "404 not found")
+		shared.ResponseJSON(w, Error{Error: "404 not found"})
 		return
 	}
-	fmt.Fprint(w, err)
+	fmt.Println(err)
+	shared.ResponseJSON(w, Error{Error: err.Error()})
 }

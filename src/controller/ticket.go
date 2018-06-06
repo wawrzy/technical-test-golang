@@ -107,9 +107,11 @@ func ticketPut(w http.ResponseWriter, r *http.Request) {
 		ErrorRequest(w, r, 400, err)
 		return
 	}
-	if err := model.UpdateTicket(uint(ticket_id), u.Author, u.Status, u.Title); err != nil {
+	var ticket interface{}
+	if ticket, err = model.UpdateTicket(uint(ticket_id), u.Author, u.Status, u.Title); err != nil {
 		ErrorRequest(w, r, 400, err)
 	}
+	shared.ResponseJSON(w, ticket)
 }
 
 func ticketArchive(w http.ResponseWriter, r *http.Request) {

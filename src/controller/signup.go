@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"../shared"
 	"../model"
+	"fmt"
 )
 
 type NewCredential struct {
@@ -29,7 +30,9 @@ func signupPost(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := model.CreateCredential(u.Username, u.Password); err != nil {
 		ErrorRequest(w, r, 400, err)
+		return
 	}
+	fmt.Fprintln(w, "Success")
 }
 
 func Signup(w http.ResponseWriter, r *http.Request) {

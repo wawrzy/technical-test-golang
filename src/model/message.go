@@ -46,11 +46,11 @@ func CreateMessage(ticket uint, author string, message string) (interface{}, err
 	return jsonMessage, nil
 }
 
-func UpdateMessage(message_id uint, ticket uint, author string, message string) error {
+func UpdateMessage(message_id uint, ticket uint, author string, message string) (interface{}, error) {
 	newMessage := Message{ID: message_id}
 
 	if db.First(&newMessage).RecordNotFound() {
-		return errors.New(fmt.Sprintf("message with id %d not found\n", message_id))
+		return nil, errors.New(fmt.Sprintf("message with id %d not found\n", message_id))
 	}
 
 	newMessage.Author = author
@@ -58,10 +58,10 @@ func UpdateMessage(message_id uint, ticket uint, author string, message string) 
 	newMessage.Message = message
 
 	if err := db.Save(&newMessage).Error; err != nil {
-		return err
+		return nil, err
 	}
-
-	return nil
+	jsonMessage := MessageJson{Author: author, Message: message, Ticket: ticket, ID: newMessage.ID}
+	return jsonMessage, nil
 }
 
 func getSingleMessage(messageId uint) (interface{}, error) {

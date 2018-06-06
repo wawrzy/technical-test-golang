@@ -30,9 +30,6 @@ make build
 
 # Build for linux
 make build-linux
-
-# Run
-make run
 ```
 
 

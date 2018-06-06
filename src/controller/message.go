@@ -58,9 +58,11 @@ func messagePut(w http.ResponseWriter, r *http.Request) {
 		ErrorRequest(w, r, 400, err)
 		return
 	}
-	if err := model.UpdateMessage(uint(message_id), u.Ticket, u.Author, u.Message); err != nil {
+	var message interface{}
+	if message, err = model.UpdateMessage(uint(message_id), u.Ticket, u.Author, u.Message); err != nil {
 		ErrorRequest(w, r, 400, err)
 	}
+	shared.ResponseJSON(w, message)
 }
 
 func Message(w http.ResponseWriter, r *http.Request) {

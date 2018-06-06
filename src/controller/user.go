@@ -8,11 +8,10 @@ import (
 )
 
 type NewUser struct {
-	Email		string
-	Password	string
-	Firstname	string
-	Lastname	string
-	Type		string
+	Email		string	`json:"email"`
+	Firstname	string	`json:"firstname"`
+	Lastname	string	`json:"lastname"`
+	Type		string	`json:"type"`
 }
 
 func (u *NewUser) OK() error {
@@ -43,7 +42,9 @@ func userPut(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := model.UpdateUser(old_email, u.Email, u.Firstname, u.Lastname, u.Type); err != nil {
 		ErrorRequest(w, r, 400, err)
+		return
 	}
+	shared.ResponseJSON(w, u)
 }
 
 func userPost(w http.ResponseWriter, r *http.Request) {
@@ -54,7 +55,9 @@ func userPost(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := model.CreateUser(u.Email, u.Firstname, u.Lastname, u.Type); err != nil {
 		ErrorRequest(w, r, 400, err)
+		return
 	}
+	shared.ResponseJSON(w, u)
 }
 
 func User(w http.ResponseWriter, r *http.Request) {

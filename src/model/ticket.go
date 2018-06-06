@@ -39,11 +39,11 @@ func CreateTicket(author string, title string) (interface{}, error) {
 	return singleTicket, nil
 }
 
-func UpdateTicket(ticket_id uint, author string, status string, title string) error {
+func UpdateTicket(ticket_id uint, author string, status string, title string) (interface{}, error) {
 	ticket := Ticket{ID: ticket_id}
 
 	if db.First(&ticket).RecordNotFound() {
-		return errors.New(fmt.Sprintf("ticket with id %d not found\n", ticket_id))
+		return nil, errors.New(fmt.Sprintf("ticket with id %d not found\n", ticket_id))
 	}
 
 	ticket.Author = author
@@ -51,10 +51,11 @@ func UpdateTicket(ticket_id uint, author string, status string, title string) er
 	ticket.Title = title
 
 	if err := db.Save(&ticket).Error; err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	singleTicket := SingleTicket{ID: ticket.ID, Author: author, Status: status, Title: title}
+	return singleTicket, nil
 }
 
 func CloseTicket(ticket_id uint) error {
