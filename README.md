@@ -6,6 +6,18 @@ This application is part of a technical exercice for an internship interview.
 
 ## Get started
 
+### Env variables
+
+|      Variable     |      Mandatory     |
+|:-----------------:|:------------------:|
+| DATABASE_NAME     |         YES        |
+| DATABASE_PORT     |         YES        |
+| DATABASE_HOST     |         YES        |
+| DATABASE_USER     |         YES        |
+| DATABASE_PASSWORD |         YES        |
+| PORT              | NO (Default: 8080) |
+
+
 ```bash
 # Get all dependencies
 make deps
