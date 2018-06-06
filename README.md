@@ -4,6 +4,10 @@
 
 This application is part of a technical exercise for an internship interview.
 
+## Description
+
+Simple REST API for ticketing.
+
 ## Get started
 
 To develop this project, I used mysql, go and [gorm](http://gorm.io/)
