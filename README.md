@@ -2,9 +2,11 @@
 
 ## Context
 
-This application is part of a technical exercice for an internship interview.
+This application is part of a technical exercise for an internship interview.
 
 ## Get started
+
+To develop this project, I used mysql, go and [gorm](http://gorm.io/)
 
 ### Env variables
 
@@ -17,6 +19,7 @@ This application is part of a technical exercice for an internship interview.
 | DATABASE_PASSWORD |         YES        |
 | PORT              | NO (Default: 8080) |
 
+### Run
 
 ```bash
 # Get all dependencies
